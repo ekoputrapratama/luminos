@@ -1,0 +1,31 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Resources",
+      "type": "shell",
+      "command": "pyrcc5 -o \"luminos/resources.py\" data/resources.qrc"
+    },
+    {
+      "label": "Run",
+      "type": "shell",
+      "command": "gdb -ex r --args python ./luminos.py -d",
+      "problemMatcher": [],
+      "dependsOn": ["Build Resources"]
+    },
+    {
+      "label": "Create Virtual Environment",
+      "type": "shell",
+      "command": "python3 -m venv .venv"
+    },
+    {
+      "label": "Setup Project",
+      "type": "shell",
+      "command": "source ./.venv/bin/activate && pip3 install -r requirements.dev.txt",
+      "dependsOn": ["Create Virtual Environment"],
+      "problemMatcher": []
+    }
+  ]
+}

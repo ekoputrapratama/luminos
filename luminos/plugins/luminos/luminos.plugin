@@ -1,0 +1,3 @@
+[plugin]
+Name=luminos
+Module=luminos.py

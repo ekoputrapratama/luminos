@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Luminos</title>
+  <style>
+    body,
+    html {
+      background: transparent;
+    }
+    .brand {
+      display: flex;
+      flex-flow: column;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+    .brand > #icon {
+      height:72px;
+      margin-bottom: 10px;
+    }
+    .brand > label {
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .button-groups {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-gap: 5px;
+    }
+    .button-groups > .group {
+      display: flex;
+      flex-flow: column;
+      align-items: center;
+      flex-grow: 1;
+    }
+    .button-groups > .group > .group-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .button-groups > .group > :not(.group-title){
+      width:80%;
+      padding:5px 0;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="brand">
+    <img id="icon" src="luminos.png" />
+    <label for="icon">Luminos</label>
+  </div>
+
+  <div class="button-groups">
+    <div class="group">
+      <h2 class="group-title">Documentation</h2>
+      <button>Wiki</button>
+    </div>
+    <div class="group">
+      <h2 class="group-title">Support</h2>
+    </div>
+    <div class="group">
+      <h2 class="group-title">Project</h2>
+    </div>
+  </div>
+</body>
+
+</html>

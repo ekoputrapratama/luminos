@@ -1,0 +1,4 @@
+[plugin]
+Name=bluetooth
+Module=bluetooth.py
+Resources=['javascripts/bluetooth.js']

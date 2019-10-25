@@ -1,0 +1,11 @@
+.tox
+.pytest_cache
+__pycache__
+*.log
+build/
+data/webengine/
+luminos/resources.py
+.venv/
+dist/
+luminos.egg-info/
+build/

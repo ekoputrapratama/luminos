@@ -1,0 +1,14 @@
+<schemalist>
+  <schema id="io.gitlab.fisma.luminos" path="/io/gitlab/fisma/desktop/">
+    <key name="background" type="s">
+      <default>'AV_Aca_mountains'</default>
+      <summary>Desktop background</summary>
+    </key>
+    <key name="enabled-plugins" type="as">
+      <default>["luminos"]</default>
+    </key>
+    <key name="loaded-plugins" type="as">
+      <default>["luminos"]</default>
+    </key>
+  </schema>
+</schemalist>

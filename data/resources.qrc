@@ -1,0 +1,11 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+	<qresource prefix="/luminos">
+		<file>js/bridge.js</file>
+    <file>js/fetch.js</file>
+    <file>js/rxjs.js</file>
+    <file>js/observable.js</file>
+	</qresource>
+</RCC>
+
+
