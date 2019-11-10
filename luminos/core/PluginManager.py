@@ -1,8 +1,11 @@
 import os
 import re
 import ast
+import sys
 import typing
+import types
 import importlib
+import importlib._bootstrap
 import configparser
 
 from PyQt5.QtCore import QObject, QUrl
@@ -10,8 +13,29 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWebEngineWidgets import QWebEngineScript
 from luminos.utils import log, utils, standarddir, config
 from luminos.core.Signal import Signal
+from .DependencyInjector import DependencyInjectorFinder, DependencyInjectorLoader
 
 Url = typing.TypeVar('Url', str, QUrl)
+
+
+class PluginInjector:
+    """
+    Convenience wrapper for DependencyInjectorLoader and DependencyInjectorFinder.
+    """
+
+    def __init__(self):
+        self._loader = DependencyInjectorLoader()
+        self._finder = DependencyInjectorFinder(self._loader)
+        self.installed = False
+        self.install()
+
+    def install(self):
+        if not self.installed:
+            self.installed = True
+            sys.meta_path.append(self._finder)
+
+    def provide(self, service_name, module):
+        self._loader.provide(service_name, module)
 
 
 class PluginInfo(configparser.ConfigParser):
@@ -44,6 +68,7 @@ class PluginManager(QObject):
         assert isinstance(lapp, Application)
 
         self._plugins = {}
+        self._injector = PluginInjector()
         self._loadedPlugins = {}
         self._pluginsResources = {}
         self._pluginsDirs = plugins_dirs + standarddir.defaultPluginsDir()
@@ -109,6 +134,8 @@ class PluginManager(QObject):
             name = f
             if info.has_section("plugin") and info.has_option("plugin", "Name"):
                 name = info.get("plugin", "Name")
+            else:
+                continue
 
             if name == plugin_name:
                 if not info.isValid():
@@ -150,6 +177,8 @@ class PluginManager(QObject):
             name = f
             if info.has_section("plugin") and info.has_option("plugin", "Name"):
                 name = info.get("plugin", "Name")
+            else:
+                continue
 
             # if it's already exists it means that user just add a new plugins directory
             if name in self._loadedPlugins.keys():
@@ -161,6 +190,7 @@ class PluginManager(QObject):
             else:
                 parentdir = os.path.dirname(f)
                 module_path = os.path.join(parentdir, info.get("plugin", "Module"))
+
                 if(not module_path.endswith(".py")):
                     module_path += ".py"
 
@@ -175,11 +205,38 @@ class PluginManager(QObject):
             try:
                 name = plugin.get("plugin", "Name")
                 module_name = plugin.get("plugin", "Module").replace(".py", "")
-
                 module_path = plugin.get("plugin", "Path")
-                package = f"luminos.plugins.{name}.{module_name}"
+
+                parentdir = os.path.dirname(module_path)
+                log.plugins.info(f"creating namespace for plugin {name}")
+                # create a fake module for this plugin namespace
+                package = f"{name}"
+                module = types.ModuleType(package)
+                module.__path__ = parentdir
+                self._injector.provide(package, module)
+
+                # TODO: add support to import module in subfolder
+                # try to load all python file except for the main file and __init__.py
+                for f in utils.findFiles("*.py", parentdir):
+                    basename = os.path.splitext(os.path.basename(f))[0]
+                    if basename == module_name or basename == '__init__':
+                        continue
+
+                    tail = f[len(parentdir + '/'):].replace(os.path.sep, '.').replace('.py', '')
+                    package = f"{name}.{tail}"
+                    m_path = f
+                    log.plugins.info(f"load external module for plugin {name} with name {module.__name__}")
+                    spec = importlib.util.spec_from_file_location(package, m_path)
+                    module = importlib.util.module_from_spec(spec)
+                    module.__path__ = m_path
+                    self._injector.provide(package, module)
+
+                log.plugins.info(f"importing main plugin module for plugin {name}")
+                package = f"{name}.{module_name}"
                 spec = importlib.util.spec_from_file_location(package, module_path)
                 module = importlib.util.module_from_spec(spec)
+                module.__path__ = module_path
+                self._injector.provide(package, module)
                 spec.loader.exec_module(module)
                 self._loadedPlugins[name] = module
 
@@ -187,16 +244,16 @@ class PluginManager(QObject):
                 By default plugin will be enabled if there was no plugin configuration.
                 """
                 cfg = config.instance.get(f"plugins.{name}")
-                shouldLoad = True
+                shouldActivate = True
                 if cfg is None:
-                    shouldLoad = False
+                    shouldActivate = False
                     cfg = dict()
                     cfg['enabled'] = True
                     config.instance.set(f"plugins.{name}.enabled", True)
 
                 # if this is the first time the plugin is registered code above will trigger _pluginStateChange
                 # and activate it, so we don't need to activate it again here
-                if cfg['enabled'] and shouldLoad:
+                if cfg['enabled'] and shouldActivate:
                     if 'activate' in dir(module):
                         module.activate()
                         self._plugins[name] = module
