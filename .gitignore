@@ -9,3 +9,4 @@ luminos/resources.py
 dist/
 luminos.egg-info/
 build/
+plugins/test/
