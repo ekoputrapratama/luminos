@@ -15,6 +15,7 @@ Url = TypeVar('Url', str, QUrl)
 
 class BrowserWindow(Window):
     webview = None
+    _pendingLoad = False
 
     def __init__(self, app):
         super().__init__(app)
