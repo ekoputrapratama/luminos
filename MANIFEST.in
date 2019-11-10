@@ -1,0 +1,9 @@
+recursive-include luminos *.py
+recursive-include plugins *.py *.js *.plugin *.css
+recursive-include data *.svg *.png
+recursive-include data *.js *.html *.css *.xml
+recursive-include scripts *.py *.sh *.js
+recursive-include data *.eot *.ttf *.woff *.woff2
+recursive-include *.qrc  *.build *.xml *.yml
+include LICENSE.txt
+include requirements.txt
