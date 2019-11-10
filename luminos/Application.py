@@ -46,7 +46,7 @@ def run(args):
     l_app.setOrganizationName("luminos")
     l_app.setApplicationName("luminos")
     l_app.setApplicationVersion(luminos.__version__)
-    l_app.registerPluginDir(os.path.join(os.getcwd(), "luminos", "plugins"))
+    l_app.registerPluginDir(os.path.join(os.getcwd(), "plugins"))
 
     if len(args.url) == 0:
         p = os.path.join(os.getcwd(), "data", "static")
