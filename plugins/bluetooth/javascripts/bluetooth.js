@@ -1,7 +1,6 @@
 
 
 document.addEventListener('ready', () => {
-  console.log("ready")
   const devices = {}
   BLE.startDiscovery({
     acceptAllDevices: true,

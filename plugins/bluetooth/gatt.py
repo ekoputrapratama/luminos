@@ -8,27 +8,55 @@ except ImportError:
     print("See also: https://github.com/getsenic/gatt-python#installing-gatt-sdk-for-python")
     sys.exit(1)
 
-import typing
-from PyQt5.QtCore import QObject, QTimer
-from luminos.core.Bridge import BridgeObject, Bridge, Variant
+from PyQt5.QtCore import QObject
 from luminos.core.Signal import Signal
 import re
-from gi.repository import GObject
-from . import errors
+
+
+class AccessDenied(Exception):
+    pass
+
+
+class Failed(Exception):
+    pass
+
+
+class InProgress(Exception):
+    pass
+
+
+class InvalidValueLength(Exception):
+    pass
+
+
+class NotAuthorized(Exception):
+    pass
+
+
+class NotReady(Exception):
+    pass
+
+
+class NotPermitted(Exception):
+    pass
+
+
+class NotSupported(Exception):
+    pass
 
 # dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
 
 def _error_from_dbus_error(e):
     return {
-        'org.bluez.Error.Failed': errors.Failed(e.get_dbus_message()),
-        'org.bluez.Error.InProgress': errors.InProgress(e.get_dbus_message()),
-        'org.bluez.Error.InvalidValueLength': errors.InvalidValueLength(e.get_dbus_message()),
-        'org.bluez.Error.NotAuthorized': errors.NotAuthorized(e.get_dbus_message()),
-        'org.bluez.Error.NotPermitted': errors.NotPermitted(e.get_dbus_message()),
-        'org.bluez.Error.NotSupported': errors.NotSupported(e.get_dbus_message()),
-        'org.freedesktop.DBus.Error.AccessDenied': errors.AccessDenied("Root permissions required")
-    }.get(e.get_dbus_name(), errors.Failed(e.get_dbus_message()))
+        'org.bluez.Error.Failed': Failed(e.get_dbus_message()),
+        'org.bluez.Error.InProgress': InProgress(e.get_dbus_message()),
+        'org.bluez.Error.InvalidValueLength': InvalidValueLength(e.get_dbus_message()),
+        'org.bluez.Error.NotAuthorized': NotAuthorized(e.get_dbus_message()),
+        'org.bluez.Error.NotPermitted': NotPermitted(e.get_dbus_message()),
+        'org.bluez.Error.NotSupported': NotSupported(e.get_dbus_message()),
+        'org.freedesktop.DBus.Error.AccessDenied': AccessDenied("Root permissions required")
+    }.get(e.get_dbus_name(), Failed(e.get_dbus_message()))
 
 
 class DiscoverError(OSError):
@@ -112,7 +140,7 @@ class Device:
 
         except dbus.exceptions.DBusException as e:
             if (e.get_dbus_name() == 'org.freedesktop.DBus.Error.UnknownObject'):
-                self.connect_failed(errors.Failed("Device does not exist, check adapter name and MAC address."))
+                self.connect_failed(Failed("Device does not exist, check adapter name and MAC address."))
             elif ((e.get_dbus_name() == 'org.bluez.Error.Failed') and
                   (e.get_dbus_message() == "Operation already in progress")):
                 pass
@@ -444,7 +472,7 @@ class DeviceManager(QObject):
             self._adapter.StartDiscovery()
         except dbus.exceptions.DBusException as e:
             if e.get_dbus_name() == 'org.bluez.Error.NotReady':
-                raise errors.NotReady(
+                raise NotReady(
                     "Bluetooth adapter not ready. "
                     "Set `is_adapter_powered` to `True` or run 'echo \"power on\" | sudo bluetoothctl'.")
             if e.get_dbus_name() == 'org.bluez.Error.InProgress':

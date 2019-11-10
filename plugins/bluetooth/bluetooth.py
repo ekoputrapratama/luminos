@@ -1,8 +1,7 @@
-
-import asyncio
 from . import gatt
 from luminos.core.Bridge import BridgeObject, Bridge, Variant
-# from luminos.utils import log
+
+# dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
 
 class ServiceBridge(BridgeObject):
@@ -46,7 +45,6 @@ class DeviceBridge(BridgeObject):
             self._services[s.uuid] = s
             self._cached_services = ServiceBridge(s)
 
-        print("service resolved", len(self._services.items()))
         self.servicesResolved.emit()
 
     @Bridge.property(str, notify=macAddressChanged)
@@ -131,10 +129,12 @@ class BluetoothGatt(BridgeObject):
         print("start discovery", options)
         if hasattr(options, "filters") and options.filters is list:
             uuids = options.filters
-
-        self.discovering = True
-        self.deviceManager.start_discovery(uuids)
-        self.deviceManager.run()
+        try:
+            self.discovering = True
+            self.deviceManager.start_discovery(uuids)
+            self.deviceManager.run()
+        except gatt.NotReady:
+            print("Please check your bluetooth if it's already turned on")
 
     @Bridge.method(str, result=Variant)
     def getDeviceByAlias(self, alias: str):

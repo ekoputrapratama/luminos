@@ -1,3 +1,2 @@
 [plugin]
 Name=websocket
-Module=websocket.py

@@ -220,7 +220,10 @@ def activate():
 
 
 def deactivate():
-    global versionInstance, pluginManagerInstance, directoryInstance
+    global versionInstance, pluginManagerInstance, directoryInstance, pathInstance, schemeInstance, paletteInstance
     versionInstance = None
     pluginManagerInstance = None
     directoryInstance = None
+    pathInstance = None
+    schemeInstance = None
+    paletteInstance = None

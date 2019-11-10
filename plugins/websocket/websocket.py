@@ -35,10 +35,10 @@ class WebSocket(BridgeObject):
     def socketDisconnected(self):
         if (self.clientConnection):
             self.clients.remove(self.clientConnection)
-            self.clientConnection.deleteLater(
+            self.clientConnection.deleteLater()
 
 
-instance=None
+instance = None
 
 
 def beforeLoad(channel, page):
@@ -50,9 +50,9 @@ def activate():
     global instance
 
     if instance is None:
-        instance=WebSocket()
+        instance = WebSocket()
 
 
 def deactivate():
     global instance
-    instance=None
+    instance = None
