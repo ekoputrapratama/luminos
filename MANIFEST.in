@@ -7,3 +7,4 @@ recursive-include data *.eot *.ttf *.woff *.woff2
 recursive-include *.qrc  *.build *.xml *.yml
 include LICENSE.txt
 include requirements.txt
+prune plugins/test
