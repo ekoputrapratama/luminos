@@ -5,8 +5,6 @@ import os
 import sys
 import logging
 import contextlib
-import pyhtml
-import copy
 import json
 import warnings
 import traceback
@@ -37,15 +35,6 @@ EXTENDED_FMT = (
     "{log_color}{levelname:8}{reset} "
     "{cyan}{name:10} {module}:{funcName}:{lineno}{reset} "
     "{log_color}{message}{reset}"
-)
-EXTENDED_FMT_HTML = (
-    "<tr>"
-    "<td><pre>%(green)s%(asctime)-8s%(reset)s</pre></td>"
-    "<td><pre>%(log_color)s%(levelname)-8s%(reset)s</pre></td>"
-    "<td></pre>%(cyan)s%(name)-10s</pre></td>"
-    "<td><pre>%(cyan)s%(module)s:%(funcName)s:%(lineno)s%(reset)s</pre></td>"
-    "<td><pre>%(log_color)s%(message)s%(reset)s</pre></td>"
-    "</tr>"
 )
 DATEFMT = "%H:%M:%S"
 LOG_COLORS = {
@@ -169,7 +158,7 @@ def _init_handlers(level, color, force_color):
     """
     global ram_handler
     global console_handler
-    console_fmt, ram_fmt, html_fmt, use_colorama = _init_formatters(
+    console_fmt, ram_fmt, use_colorama = _init_formatters(
         level, color, force_color
     )
 
@@ -221,9 +210,8 @@ def _init_formatters(level, color, force_color):
     """
     console_fmt = get_console_format(level)
     ram_formatter = ColoredFormatter(EXTENDED_FMT, DATEFMT, "{", use_colors=False)
-    html_formatter = HTMLFormatter(EXTENDED_FMT_HTML, DATEFMT, log_colors=LOG_COLORS)
     if sys.stderr is None:
-        return None, ram_formatter, html_formatter, False
+        return None, ram_formatter, False
 
     use_colorama = False
     color_supported = os.name == "posix" or colorama
@@ -238,7 +226,7 @@ def _init_formatters(level, color, force_color):
     console_formatter = ColoredFormatter(
         console_fmt, DATEFMT, "{", use_colors=use_colors
     )
-    return console_formatter, ram_formatter, html_formatter, use_colorama
+    return console_formatter, ram_formatter, use_colorama
 
 
 def change_console_formatter(level):
@@ -543,63 +531,6 @@ class ColoredFormatter(logging.Formatter):
             color_dict["log_color"] = ""
         record.__dict__.update(color_dict)
         return super().format(record)
-
-
-class HTMLFormatter(logging.Formatter):
-
-    """Formatter for HTML-colored log messages.
-
-    Attributes:
-        _log_colors: The colors to use for logging levels.
-        _colordict: The colordict passed to the logger.
-    """
-
-    def __init__(self, fmt, datefmt, log_colors):
-        """Constructor.
-
-        Args:
-            fmt: The format string to use.
-            datefmt: The date format to use.
-            log_colors: The colors to use for logging levels.
-        """
-        super().__init__(fmt, datefmt)
-        self._log_colors = log_colors
-        self._colordict = {}
-        # We could solve this nicer by using CSS, but for this simple case this
-        # works.
-        for color in COLORS:
-            self._colordict[color] = '<font color="{}">'.format(color)
-        self._colordict["reset"] = "</font>"
-
-    def format(self, record):
-        record_clone = copy.copy(record)
-        record_clone.__dict__.update(self._colordict)
-        if record_clone.levelname in self._log_colors:
-            color = self._log_colors[record_clone.levelname]
-            record_clone.log_color = self._colordict[color]
-        else:
-            record_clone.log_color = ""
-        for field in [
-            "msg",
-            "filename",
-            "funcName",
-            "levelname",
-            "module",
-            "name",
-            "pathname",
-            "processName",
-            "threadName",
-        ]:
-            data = str(getattr(record_clone, field))
-            setattr(record_clone, field, pyhtml.escape(data))
-        msg = super().format(record_clone)
-        if not msg.endswith(self._colordict["reset"]):
-            msg += self._colordict["reset"]
-        return msg
-
-    def formatTime(self, record, datefmt=None):
-        out = super().formatTime(record, datefmt)
-        return pyhtml.escape(out)
 
 
 class JSONFormatter(logging.Formatter):
