@@ -96,7 +96,7 @@ class Scheme(BridgeObject):
         self.schemes = app.schemes
 
     @Bridge.method(str, result=str)
-    def pathByScheme(self, scheme):
+    def getPathByScheme(self, scheme):
         return self.schemes[scheme]
 
 

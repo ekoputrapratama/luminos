@@ -170,7 +170,7 @@ def check_libraries():
         'PyQt5.QtQml': _missing_str("PyQt5.QtQml"),
         'PyQt5.QtSql': _missing_str("PyQt5.QtSql"),
         'PyQt5.QtOpenGL': _missing_str("PyQt5.QtOpenGL"),
-        'ruamel.yaml': _missing_str("ruamel.yaml")
+        # 'ruamel.yaml': _missing_str("ruamel.yaml")
     }
     _check_modules(modules)
 

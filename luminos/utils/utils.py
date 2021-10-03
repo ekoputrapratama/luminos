@@ -8,6 +8,7 @@ import glob
 import re
 import mimetypes
 import gi
+from subprocess import call
 
 gi.require_version("Gio", "2.0")
 
@@ -28,6 +29,10 @@ arguments = [
     ["-d", "--debug", "Show debug output.", "store_true"]
 ]
 
+cli_args = [
+    ["-I", "--init", "Initialize luminos project", None]
+]
+
 _content_types = {
     '.html': 'text/html',
     '.js': 'text/javascript',
@@ -44,8 +49,11 @@ def get_argparser():
     """Get the argparse parser."""
     parser = argparse.ArgumentParser(prog='luminos',
                                      description=luminos.__description__)
-    global arguments
+    global arguments, cli_args
     for s, l, desc, act in arguments:
+        parser.add_argument(s, l, help=desc, action=act)
+
+    for s, l, desc, act in cli_args:
         parser.add_argument(s, l, help=desc, action=act)
 
     parser.add_argument('--nocolor', help="Turn off colored logging.",
@@ -56,6 +64,47 @@ def get_argparser():
     parser.add_argument('url', nargs='*', help="Application directory to open on startup "
                         "(empty to load default application).")
     return parser
+
+
+def isInEmptyFolder(path: str = os.getcwd()) -> bool:
+    list = os.listdir(path)
+    if len(list) == 0:
+        return True
+
+    return False
+
+
+def initializeVenv():
+    print("Initializing virtual environment...")
+    call(['pip', 'install', 'venv', '--user'])
+    call(['python3', '-m', 'venv', '.venv'])
+    # TODO: support for Windows
+    call(['source', '.venv/bin/activate'])
+
+
+def installDeps():
+    print('installing dependencies...')
+    call(['pip', 'install', 'autopep8'])
+    call(['pip', 'install', 'flake8'])
+    call(['pip', 'install', 'setuptools'])
+    call(['pip', 'install', 'twine'])
+    call(['pip', 'install', 'luminos'])
+
+
+# TODO: Download some code from github/gitlab repository as a quick start guide
+def initializeProject(name: str, projectName: str = None):
+    if(name == 'rect-webpack'):
+        if isInEmptyFolder():
+            initializeVenv()
+            installDeps()
+        else:
+            if projectName is None:
+                projectName = "luminos-react-starter"
+
+            os.makedirs(os.path.abspath(projectName), 0o755, exist_ok=True)
+            call(['cd', projectName])
+            initializeVenv()
+            installDeps()
 
 
 def cleanArgs(argv: list):
@@ -103,7 +152,7 @@ def ensureUserBinDirInPath():
         bashrc_path = os.path.expanduser("~/.bashrc")
 
         with open(bashrc_path, "a+") as f:
-            f.write('\nexport PATH="{}:$PATH"\n'.format(userBinPath))
+            f.write(f'\nexport PATH="{userBinPath}:$PATH"\n')
 
 
 def isInstalled() -> bool:

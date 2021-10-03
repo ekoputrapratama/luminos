@@ -42,6 +42,6 @@ document.addEventListener('ready', () => {
       }).then(devices => devices[0])
     }
   }
-  navigator.blueetooth = new Bluetooth()
+  navigator.bluetooth = new Bluetooth()
 
 })

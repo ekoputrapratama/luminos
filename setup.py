@@ -97,7 +97,7 @@ with open(os.path.join(BASEDIR, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name="luminos",
-    version="0.3.6",
+    version="0.3.8",
     python_requires='>=3.5',
     packages=find_packages(exclude=['scripts', 'scripts.*', 'tests', 'tests.*']),
     url="https://gitlab.com/fisma/luminos",

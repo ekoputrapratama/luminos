@@ -140,7 +140,7 @@ class Application(AbstractApplication):
         self.schemeHandler.install(self.profile, self.schemes)
 
     @classmethod
-    def registerApp(self, directory: str) -> None:
+    def registerApp(cls, directory: str) -> None:
 
         url = None
         if path.isabs(directory):
@@ -175,9 +175,9 @@ class Application(AbstractApplication):
                 log.plugins.warning("Plugin directory provided is not writable, ignoring it.")
 
     @classmethod
-    def registerUriScheme(self, name: str, base_path: str):
-        if not name in self.schemes.keys():
-            self.schemes[name] = base_path
+    def registerUriScheme(cls, name: str, base_path: str):
+        if not name in cls.schemes.keys():
+            cls.schemes[name] = base_path
 
             if not QWebEngineUrlScheme.schemeByName(name.encode()).name():
                 scheme = QWebEngineUrlScheme(name.encode())

@@ -6,14 +6,17 @@
     {
       "label": "Build Resources",
       "type": "shell",
-      "command": "pyrcc5 -o \"luminos/resources.py\" data/resources.qrc"
+      "command": "./.venv/bin/pyrcc5 -o \"luminos/resources.py\" data/resources.qrc",
+      "problemMatcher": []
     },
     {
       "label": "Run",
       "type": "shell",
-      "command": "gdb -ex r --args python ./luminos.py -d",
+      "command": "python ./luminos.py -d",
       "problemMatcher": [],
-      "dependsOn": ["Build Resources"]
+      "dependsOn": [
+        "Build Resources"
+      ]
     },
     {
       "label": "Create Virtual Environment",
@@ -24,7 +27,9 @@
       "label": "Setup Project",
       "type": "shell",
       "command": "source ./.venv/bin/activate && pip3 install -r requirements.dev.txt",
-      "dependsOn": ["Create Virtual Environment"],
+      "dependsOn": [
+        "Create Virtual Environment"
+      ],
       "problemMatcher": []
     }
   ]
