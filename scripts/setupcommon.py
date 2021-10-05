@@ -19,6 +19,9 @@ def copyTree(src: str, dst: str, symlinks: bool = False, ignore=None):
     src = os.path.abspath(src)
     dst = os.path.abspath(dst)
 
+    if not os.path.exists(dst):
+        os.makedirs(dst, 0o777, True)
+
     for item in os.listdir(src):
         s = os.path.join(src, item)
         d = os.path.join(dst, item)
@@ -26,12 +29,12 @@ def copyTree(src: str, dst: str, symlinks: bool = False, ignore=None):
             if os.path.exists(d):
                 shutil.rmtree(d)
 
-            shutil.copytree(s, d, symlinks, ignore)
+            shutil.copytree(s, d, symlinks, ignore, dirs_exist_ok=True)
         else:
             if os.path.exists(d):
                 shutil.os.remove(d)
 
-            shutil.copy2(s, d)
+            shutil.copy(s, d)
 
 
 def copyFile(s: str, d: str):
