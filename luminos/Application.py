@@ -4,6 +4,7 @@ import os
 from os import path
 import signal
 import typing  # noqa
+from pathlib import Path
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWebEngineWidgets import QWebEngineProfile
@@ -36,6 +37,8 @@ def run(args):
     signal.signal(signal.SIGINT, sigint_handler)
 
     global l_app
+    # prevent a bunch of error mentioning about failure when creating shared context
+    os.environ["QMLSCENE_DEVICE"] = "opengl"
     """
     This attribute need to be set before QCoreApplication created,
     it will still show warning because QWebEngineView::initialize call this at the end.
@@ -46,16 +49,23 @@ def run(args):
     l_app.setOrganizationName("luminos")
     l_app.setApplicationName("luminos")
     l_app.setApplicationVersion(luminos.__version__)
+
     l_app.registerPluginDir(os.path.join(os.getcwd(), "plugins"))
 
     if len(args.url) == 0:
         p = os.path.join(os.getcwd(), "data", "static")
         l_app.registerApp(p)
+    else:
+        if os.path.isabs(args.url[0]):
+            p = args.url[0]
+        else:
+            p = os.path.join(os.getcwd(), args.url[0])
 
+    print(f"path {Path(p).as_uri()}")
     window = BrowserWindow(l_app)
 
     if len(args.url) > 0:
-        window.loadUrl(args.url[0])
+        window.loadUrl(Path(p).as_uri())
 
     # Python cannot handle signals while the Qt event loop is running.
     # so we need to use QTimer to let the interpreter run from time to time.
@@ -70,9 +80,9 @@ def run(args):
 
 
 class Application(AbstractApplication):
-    schemes = {}
-    pluginsDirs = []
-    pluginManager: PluginManager = None
+    schemes: dict[str, str] = {}
+    pluginsDirs: list[str] = []
+    pluginManager: PluginManager
 
     def __init__(self, argv, name=None):
         if name is None:
@@ -88,6 +98,7 @@ class Application(AbstractApplication):
                 QWebEngineUrlScheme.registerScheme(scheme)
 
         self._initProfile()
+
         # self.interceptor = UrlRequestInterceptor()
         # self.profile.setRequestInterceptor(self.interceptor)
         log.init.debug("Initializing web setings...")
