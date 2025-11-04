@@ -9,7 +9,7 @@
 # IMPORTANT NOTICE
 
 Luminos now rebranded as Velra but Velra will be in a private repository
-This repo wont be updated anymore to avoid some specific countries to access my code, if you want access it you gonna need to make an issue here and let me validate your country/region there. In the future all my project will be private, including AI related etc.
+This repo wont be updated anymore to avoid some specific countries to access my code, if you want to access it you gonna need to make an issue here and let me validate your country/region there. In the future all my project will be private, including AI related etc.
 
 ## 🚀 Overview
 
